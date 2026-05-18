@@ -1,0 +1,22 @@
+build/
+Debug/
+Release/
+mx.scratch/
+__Previews/
+Project Logs for */
+Project Outputs for */
+
+# Tool and build artifacts
+*.o
+*.obj
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.su
+*.cyclo
+
+# Keep STM32CubeIDE project settings tracked
+!.settings/

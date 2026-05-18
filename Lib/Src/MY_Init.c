@@ -1,0 +1,31 @@
+#include "MY_Init.h"
+
+
+void My_Init(void)
+{
+
+
+
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&ADC_DMA[0], 1);
+  HAL_ADC_Start_DMA(&hadc3, (uint32_t *)&ADC_DMA[1], 1);
+  HAL_ADC_Start_DMA(&hadc2, (uint32_t *)&ADC_DMA[2], 1);
+  HAL_ADC_Start_DMA(&hadc4, (uint32_t *)&ADC_DMA[3], 2);
+
+
+  __HAL_HRTIM_MASTER_ENABLE_IT(&hhrtim1, HRTIM_MASTER_IT_MREP);
+  if (HAL_HRTIM_WaveformCountStart(&hhrtim1, HRTIM_TIMERID_MASTER) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_HRTIM_WaveformCountStart(&hhrtim1, HRTIM_TIMERID_TIMER_A|HRTIM_TIMERID_TIMER_B|HRTIM_TIMERID_TIMER_E);
+  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TA1|HRTIM_OUTPUT_TA1|HRTIM_OUTPUT_TB1|HRTIM_OUTPUT_TB2|HRTIM_OUTPUT_TE1|HRTIM_OUTPUT_TE2);
+  HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_A].CMP1xR = 17000;
+  HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_B].CMP1xR = 17000;
+  HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_E].CMP1xR = 17000;
+
+
+
+}
+
+
+
