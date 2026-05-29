@@ -30,6 +30,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "arm_math.h"
+#include "MY_Init.h"
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,6 +52,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+uint8_t Test = 0;
 
 /* USER CODE END PV */
 
@@ -99,14 +103,12 @@ int main(void)
   MX_FDCAN2_Init();
   MX_HRTIM1_Init();
   MX_SPI3_Init();
-  MX_USART3_UART_Init();
   MX_USART2_UART_Init();
-  MX_TIM1_Init();
   MX_ADC3_Init();
-  MX_TIM6_Init();
   MX_ADC4_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-
+  My_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,6 +118,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    HAL_GPIO_TogglePin(LED_0_GPIO_Port, LED_0_Pin);
+    HAL_Delay(200);
+
+
+
+
   }
   /* USER CODE END 3 */
 }
