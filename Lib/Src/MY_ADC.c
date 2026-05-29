@@ -29,9 +29,9 @@ ADC_t ADC_Value =
     .Curr_Bus = 0.0f,
     .Vol_Bus = 0.0f,
 
-    .Offset_U = 2047,
-    .Offset_V = 2047,
-    .Offset_W = 2047,
+    .Offset_U = 1980,
+    .Offset_V = 2007,
+    .Offset_W = 1967,
 
     .Offset_Sum_U = 0,
     .Offset_Sum_V = 0,

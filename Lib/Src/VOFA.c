@@ -43,7 +43,7 @@ void Vofa_JustFloat(float *_data, uint8_t _num)
 void Vofa_Send(uint8_t num)
 {
     static float Vofa_Buffer[5];
-    Vofa_Buffer[0] = ADC_Value.Curr_A;
+    Vofa_Buffer[0] = ADC_Value.Curr_A + ADC_Value.Curr_B + ADC_Value.Curr_C;
     Vofa_Buffer[1] = ADC_Value.Curr_B;
     Vofa_Buffer[2] = ADC_Value.Curr_C;
     Vofa_Buffer[3] = 0;

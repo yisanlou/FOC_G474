@@ -82,7 +82,7 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>0</RunUserProg2>
+            <RunUserProg2>1</RunUserProg2>
             <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -357,7 +357,7 @@
             <ClangAsOpt>1</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>__MICROLIB</Define>
+              <Define></Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -393,7 +393,7 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Application/User/Src/Core</GroupName>
+          <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
               <FileName>main.c</FileName>
@@ -449,156 +449,6 @@
               <FileName>stm32g4xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32g4xx_hal_msp.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Application/User/Src/Lib</GroupName>
-          <Files>
-            <File>
-              <FileName>Control.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/Control.c</FilePath>
-            </File>
-            <File>
-              <FileName>FOC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/FOC.c</FilePath>
-            </File>
-            <File>
-              <FileName>MY_ADC.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/MY_ADC.c</FilePath>
-            </File>
-            <File>
-              <FileName>MY_Init.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/MY_Init.c</FilePath>
-            </File>
-            <File>
-              <FileName>MY_Tim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/MY_Tim.c</FilePath>
-            </File>
-            <File>
-              <FileName>TEST.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/TEST.c</FilePath>
-            </File>
-            <File>
-              <FileName>VOFA.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Lib/Src/VOFA.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Application/User/Inc/Core</GroupName>
-          <Files>
-            <File>
-              <FileName>adc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/adc.h</FilePath>
-            </File>
-            <File>
-              <FileName>dma.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/dma.h</FilePath>
-            </File>
-            <File>
-              <FileName>fdcan.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/fdcan.h</FilePath>
-            </File>
-            <File>
-              <FileName>gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>hrtim.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/hrtim.h</FilePath>
-            </File>
-            <File>
-              <FileName>main.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/main.h</FilePath>
-            </File>
-            <File>
-              <FileName>spi.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/spi.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g4xx_hal_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/stm32g4xx_hal_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g4xx_it.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/stm32g4xx_it.h</FilePath>
-            </File>
-            <File>
-              <FileName>tim.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/tim.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Core/Inc/usart.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Application/User/Inc/Lib</GroupName>
-          <Files>
-            <File>
-              <FileName>Control.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/Control.h</FilePath>
-            </File>
-            <File>
-              <FileName>define.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/define.h</FilePath>
-            </File>
-            <File>
-              <FileName>FOC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/FOC.h</FilePath>
-            </File>
-            <File>
-              <FileName>MotorCofig.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/MotorCofig.h</FilePath>
-            </File>
-            <File>
-              <FileName>MY_ADC.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/MY_ADC.h</FilePath>
-            </File>
-            <File>
-              <FileName>MY_Init.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/MY_Init.h</FilePath>
-            </File>
-            <File>
-              <FileName>MY_Tim.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/MY_Tim.h</FilePath>
-            </File>
-            <File>
-              <FileName>TEST.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/TEST.h</FilePath>
-            </File>
-            <File>
-              <FileName>VOFA.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>../Lib/Inc/VOFA.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -748,6 +598,96 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Lib/Src</GroupName>
+          <Files>
+            <File>
+              <FileName>Control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\Control.c</FilePath>
+            </File>
+            <File>
+              <FileName>FOC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\FOC.c</FilePath>
+            </File>
+            <File>
+              <FileName>MY_ADC.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\MY_ADC.c</FilePath>
+            </File>
+            <File>
+              <FileName>MY_Init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\MY_Init.c</FilePath>
+            </File>
+            <File>
+              <FileName>MY_Tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\MY_Tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>TEST.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\TEST.c</FilePath>
+            </File>
+            <File>
+              <FileName>VOFA.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Lib\Src\VOFA.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Lib/Inc</GroupName>
+          <Files>
+            <File>
+              <FileName>Control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\Control.h</FilePath>
+            </File>
+            <File>
+              <FileName>define.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\define.h</FilePath>
+            </File>
+            <File>
+              <FileName>FOC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\FOC.h</FilePath>
+            </File>
+            <File>
+              <FileName>MotorCofig.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\MotorCofig.h</FilePath>
+            </File>
+            <File>
+              <FileName>MY_ADC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\MY_ADC.h</FilePath>
+            </File>
+            <File>
+              <FileName>MY_Init.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\MY_Init.h</FilePath>
+            </File>
+            <File>
+              <FileName>MY_Tim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\MY_Tim.h</FilePath>
+            </File>
+            <File>
+              <FileName>TEST.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\TEST.h</FilePath>
+            </File>
+            <File>
+              <FileName>VOFA.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Lib\Inc\VOFA.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
@@ -766,5 +706,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>PMSM_G474</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

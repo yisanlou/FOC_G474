@@ -30,13 +30,14 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
     
     CLARKE(ADC_Value.Curr_A, ADC_Value.Curr_B, ADC_Value.Curr_C, &FOC_State.Ialpha, &FOC_State.Ibeta);
     ParkTransform(FOC_State.Ialpha, FOC_State.Ibeta,FOC_State.sinVal, FOC_State.cosVal, &FOC_State.Id, &FOC_State.Iq);
-    if(CNT == 5) {
+    if(CNT >= 1000) {
         // SpdLoop_Run();
-        Vofa_Send(3);
+       //
+        Vofa_Send(1);
         CNT = 0;
     }
     // CurrLoop_Run();
-//    OpenloopVol(2.5f, 50.0f, 5.0f);
+   OpenloopVol(1.6f, 50.0f, 5.0f);
 
 
     
