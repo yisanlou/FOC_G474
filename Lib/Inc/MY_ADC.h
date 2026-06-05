@@ -45,5 +45,6 @@ extern ADC_Config_t ADC_Config;
 extern ADC_t ADC_Value;
 
 void ADC_Calibration(void);
+void Current_Samp(void);
 
 #endif

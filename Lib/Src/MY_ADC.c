@@ -1,4 +1,5 @@
 #include "MY_ADC.h"
+#include "MotorCofig.h"
 
 
 #define ADC_OFFSET_NUM    1000U
@@ -46,6 +47,32 @@ void ADC_Calibration(void)
 {
     
 }
+
+void Current_Samp()
+{
+    ADC_Value.Raw_U = ADC_DMA[0];
+    ADC_Value.Raw_V = ADC_DMA[1];
+    ADC_Value.Raw_W = ADC_DMA[2];
+
+    float curr_u = ((float)ADC_Value.Raw_U - (float)ADC_Value.Offset_U) * ADC_Value.Adc_to_Curr;
+    float curr_v = ((float)ADC_Value.Raw_V - (float)ADC_Value.Offset_V) * ADC_Value.Adc_to_Curr;
+    float curr_w = ((float)ADC_Value.Raw_W - (float)ADC_Value.Offset_W) * ADC_Value.Adc_to_Curr;
+
+#if (PHASE_SEQUENCE == PHASE_POSITIVE)
+    ADC_Value.Curr_A = curr_u;
+    ADC_Value.Curr_B = curr_v;
+    ADC_Value.Curr_C = curr_w;
+#elif (PHASE_SEQUENCE == PHASE_NEGATIVE)
+    ADC_Value.Curr_A = curr_u;
+    ADC_Value.Curr_B = curr_w;
+    ADC_Value.Curr_C = curr_v;
+#else
+#error "Invalid PHASE_SEQUENCE"
+#endif
+
+    
+}
+
 
 
 

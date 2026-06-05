@@ -8,7 +8,8 @@
 
 
 
-void OpenloopVol(float Volq, float Spd, float Poles);
+void OpenloopVol(float Volq, float Vold, float Spd, float Poles);
+void Correct_Offset(float Vold, float Etheta, float Poles);
 
 
 #endif

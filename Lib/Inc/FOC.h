@@ -17,11 +17,16 @@ typedef struct
 {
     float Ialpha;
     float Ibeta;
+    float Ualpha;
+    float Ubeta;
     float Etheta;
     float sinVal;
     float cosVal;
+    float Vol_Q;
+    float Vol_D;
     float Id;
     float Iq;
+    float Vel;  //RPM
 }FOC_State_t;
 
 
@@ -31,7 +36,7 @@ extern uint16_t CMPU;
 extern uint16_t CMPV;
 extern uint16_t CMPW;
 
-
+extern uint8_t Sector;
 static inline float OutputLimitation(float max, float min, float value)
 {
     if (value > max) return max;
@@ -47,8 +52,8 @@ static inline void INVERSEPARK(float VolQ, float VolD, float cosVal, float sinVa
 
 static inline void CLARKE(float Ia, float Ib, float Ic, float *pIalpha, float *pIbeta)
 {
-    *pIalpha = Ia;
-    *pIbeta  = ONE_BY_SQRT3 * (Ib - Ic);
+    *pIalpha = Ia ;
+    *pIbeta  = 0.57735026919f * (Ib - Ic);
 }
 
 static inline void ParkTransform(float Ialpha, float Ibeta,float sinVal, float cosVal, float *pId, float *pIq)
@@ -58,6 +63,8 @@ static inline void ParkTransform(float Ialpha, float Ibeta,float sinVal, float c
 }
 
 void SVPWM(float Valpha, float Vbeta, float Vdc);
+float FOC_GetVbus(void);
+void FOC_UpdatePwmCompare(void);
 
 
 #endif

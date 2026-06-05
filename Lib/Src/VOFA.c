@@ -3,8 +3,10 @@
 #include <string.h>
 
 #include "FOC.h"
-
+#include "Control.h"
 #include "MY_ADC.h"
+#include "Encoder.h"
+
 
 void Vofa_JustFloat(float *_data, uint8_t _num)
 {
@@ -42,13 +44,32 @@ void Vofa_JustFloat(float *_data, uint8_t _num)
 
 void Vofa_Send(uint8_t num)
 {
-    static float Vofa_Buffer[5];
-    Vofa_Buffer[0] = ADC_Value.Curr_A + ADC_Value.Curr_B + ADC_Value.Curr_C;
-    Vofa_Buffer[1] = ADC_Value.Curr_B;
-    Vofa_Buffer[2] = ADC_Value.Curr_C;
-    Vofa_Buffer[3] = 0;
-    Vofa_Buffer[4] = 0;
+    static float Vofa_Buffer[8];
+
+    Vofa_Buffer[0] = FOC_State.Id;
+    Vofa_Buffer[1] = FOC_State.Iq;
+    Vofa_Buffer[2] = FOC_State.Ualpha;
+    Vofa_Buffer[3] = FOC_State.Ubeta;
+    Vofa_Buffer[4] = Real.Mech_Vel_RPM;
+    Vofa_Buffer[5] = ADC_Value.Curr_A;
+    Vofa_Buffer[6] = ADC_Value.Curr_B;
+    Vofa_Buffer[7] = ADC_Value.Curr_C;
+
+    if (num > 8)
+    {
+        num = 8;
+    }
 
     Vofa_JustFloat(Vofa_Buffer, num);
 
+}
+
+void UART_Send(const char *str)
+{
+    if (str == NULL)
+    {
+        return;
+    }
+
+    HAL_UART_Transmit(&huart2, (uint8_t *)str, strlen(str), 10);
 }

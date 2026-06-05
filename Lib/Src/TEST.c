@@ -4,22 +4,11 @@
 #include "hrtim.h"
 #include "main.h"
 
-#define OPENLOOP_DEFAULT_VBUS 48.0f
 #define OPENLOOP_TWO_PI       6.28318530718f
 
 float Theta = 0.0f;
 
-static inline float Openloop_GetVbus(void)
-{
-    if (ADC_Value.Vol_Bus > FOC_VDC_MIN)
-    {
-        return ADC_Value.Vol_Bus;
-    }
-
-    return OPENLOOP_DEFAULT_VBUS;
-}
-
-void OpenloopVol(float Volq, float Spd, float Poles)
+void OpenloopVol(float Volq, float Vold, float Spd, float Poles)
 {
     float Valpha;
     float Vbeta;
@@ -27,7 +16,7 @@ void OpenloopVol(float Volq, float Spd, float Poles)
 
     if (Poles <= 0.0f)
     {
-        SVPWM(0.0f, 0.0f, Openloop_GetVbus());
+        SVPWM(0.0f, 0.0f, FOC_GetVbus());
         return;
     }
 
@@ -48,11 +37,22 @@ void OpenloopVol(float Volq, float Spd, float Poles)
     FOC_State.cosVal = arm_cos_f32(Theta);
     FOC_State.sinVal = arm_sin_f32(Theta);
 
-    INVERSEPARK(Volq, 0.0f, FOC_State.cosVal, FOC_State.sinVal, &Valpha, &Vbeta);
-    SVPWM(Valpha, Vbeta, Openloop_GetVbus());
+    INVERSEPARK(Volq, Vold, FOC_State.cosVal, FOC_State.sinVal, &Valpha, &Vbeta);
+    SVPWM(Valpha, Vbeta, FOC_GetVbus());
 
-    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_A].CMP1xR = CMPU;
-    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_B].CMP1xR = CMPV;
-    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_E].CMP1xR = CMPW;
+    FOC_UpdatePwmCompare();
+}
+
+void Correct_Offset(float Vold, float Etheta, float Poles)
+{
+
+    float cosVal = arm_cos_f32(Etheta);
+    float sinVal = arm_sin_f32(Etheta);
+
+    INVERSEPARK(0.0f, Vold, cosVal, sinVal, &FOC_State.Ualpha, &FOC_State.Ubeta);
+    SVPWM(FOC_State.Ualpha, FOC_State.Ubeta, FOC_GetVbus());
+
+    FOC_UpdatePwmCompare();
+
 }
 

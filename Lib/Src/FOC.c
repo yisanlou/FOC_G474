@@ -1,14 +1,24 @@
 #include "FOC.h"
+#include "hrtim.h"
+#include "MotorCofig.h"
+#include "MY_ADC.h"
+
+#define FOC_DEFAULT_VBUS 48.0f
 
 FOC_State_t FOC_State =
 {
     .Ialpha = 0.0f,
     .Ibeta = 0.0f,
+    .Ualpha = 0.0f,
+    .Ubeta = 0.0f,
     .Etheta = 0.0f,
     .sinVal = 0.0f,
     .cosVal = 0.0f,
+    .Vol_Q = 0.0f,
+    .Vol_D = 0.0f,
     .Id = 0.0f,
     .Iq = 0.0f,
+    .Vel = 0.0f
 
 };
 
@@ -17,8 +27,12 @@ uint16_t CMPU = 0;
 uint16_t CMPV = 0;
 uint16_t CMPW = 0;
 
+uint8_t  Sector = 0;
+
 static inline uint16_t SVPWM_ClampCompare(float compare)
 {
+    uint16_t cmp;
+
     if (compare != compare)
     {
         return PWM_ARR / 2U;
@@ -26,15 +40,18 @@ static inline uint16_t SVPWM_ClampCompare(float compare)
 
     if (compare <= 0.0f)
     {
-        return 0;
+        cmp = 0;
     }
-
-    if (compare >= (float)PWM_ARR)
+    else if (compare >= (float)PWM_ARR)
     {
-        return PWM_ARR;
+        cmp = PWM_ARR;
+    }
+    else
+    {
+        cmp = (uint16_t)(compare + 0.5f);
     }
 
-    return (uint16_t)(compare + 0.5f);
+    return PWM_ARR - cmp;
 }
 
 static inline void SVPWM_SetNeutralCompare(void)
@@ -42,6 +59,16 @@ static inline void SVPWM_SetNeutralCompare(void)
     CMPU = PWM_ARR / 2U;
     CMPV = PWM_ARR / 2U;
     CMPW = PWM_ARR / 2U;
+}
+
+float FOC_GetVbus(void)
+{
+    if (ADC_Value.Vol_Bus > FOC_VDC_MIN)
+    {
+        return ADC_Value.Vol_Bus;
+    }
+
+    return FOC_DEFAULT_VBUS;
 }
 
 void SVPWM(float Valpha, float Vbeta, float Vdc)
@@ -65,6 +92,7 @@ void SVPWM(float Valpha, float Vbeta, float Vdc)
     if(Vbeta > 0.0f) SectorN |= 1U;
     if(Vref2 > 0.0f) SectorN |= 2U;
     if(Vref3 > 0.0f) SectorN |= 4U;
+    Sector = SectorN;
 
     K = SQRT3 * SVPWM_PERIOD / Vdc;
 
@@ -148,4 +176,19 @@ void SVPWM(float Valpha, float Vbeta, float Vdc)
         break;
     }
 
+}
+
+void FOC_UpdatePwmCompare(void)
+{
+#if (PHASE_SEQUENCE == PHASE_POSITIVE)
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_B].CMP1xR = CMPU;
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_A].CMP1xR = CMPV;
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_E].CMP1xR = CMPW;
+#elif (PHASE_SEQUENCE == PHASE_NEGATIVE)
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_B].CMP1xR = CMPU;
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_A].CMP1xR = CMPW;
+    HRTIM1->sTimerxRegs[HRTIM_TIMERINDEX_TIMER_E].CMP1xR = CMPV;
+#else
+#error "Invalid PHASE_SEQUENCE"
+#endif
 }

@@ -31,11 +31,6 @@ typedef struct
 
 }Ctrl_t;
 
-extern Ctrl_t IqLoop;
-extern Ctrl_t IdLoop;
-extern Ctrl_t SpdLoop;
-extern Ctrl_t PosLoop;
-
 typedef struct
 {
     float pos_ref;
@@ -56,11 +51,28 @@ typedef struct
 
 }MITMode_t;
 
+
+typedef struct
+{
+    float Iq;
+    float Id;
+    float Mech_Vel_RPM;
+    float Mech_Vel_Rad;
+    float Mech_Pos;
+
+}Ctrl_Value_t;
+
+extern Ctrl_t IqLoop;
+extern Ctrl_t IdLoop;
+extern Ctrl_t SpdLoop;
+extern Ctrl_t PosLoop;
 extern MITMode_t MITMode;
+extern Ctrl_Value_t Expt;
+extern Ctrl_Value_t Real;
 
 void CurrLoop_Reset(void);
 void CurrLoop_Run(float RealQ, float RealD, float ExptQ, float ExptD, float *Volq, float *Vold);
-void SpdLoop_Run(void);
+void SpdLoop_Run(float RealVel, float ExptVel, float *ExptQ);
 void PosLoop_Run(void);
 void MITModeLoop_Run(void);
 

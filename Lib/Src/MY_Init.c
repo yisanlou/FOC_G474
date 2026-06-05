@@ -1,5 +1,5 @@
 #include "MY_Init.h"
-
+#include "Encoder.h"
 
 //TimeerB -> U  TimeerA -> V    TimeerE -> W
 
@@ -7,8 +7,6 @@
 
 void My_Init(void)
 {
-
-
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)&ADC_DMA[0], 1);
   HAL_ADC_Start_DMA(&hadc3, (uint32_t *)&ADC_DMA[1], 1);

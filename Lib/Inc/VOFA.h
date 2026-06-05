@@ -4,6 +4,7 @@
 #include "main.h"
 
 void Vofa_Send(uint8_t num);
+void UART_Send(const char *str);
 
 
 #endif
