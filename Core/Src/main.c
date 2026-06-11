@@ -31,6 +31,7 @@
 /* USER CODE BEGIN Includes */
 #include "arm_math.h"
 #include "MY_Init.h"
+#include "VOFA.h"
 #include <stdint.h>
 /* USER CODE END Includes */
 
@@ -109,6 +110,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   My_Init();
+  UART_Receive();
   /* USER CODE END 2 */
 
   /* Infinite loop */

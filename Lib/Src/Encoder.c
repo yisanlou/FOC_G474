@@ -75,28 +75,32 @@ void Encoder_GetElectricalRad(uint32_t encoder_raw)
 }
 
 
-void Encoder_CalcSpeed( )
+void Encoder_CalcSpeed(float Ts)
 {
     static uint32_t last_raw = 0;
     static uint8_t init = 0;
+    static float vel_rpm_filt = 0.0f;
+    uint32_t raw_now = Encoder_Value.Raw_Num;
     int32_t delta;
-    float Ts = SpdLoop.Ts;
+    float vel_rpm_raw;
 
     if (Ts <= 0.0f)
     {
+        vel_rpm_filt = 0.0f;
         Real.Mech_Vel_RPM = 0.0f;
         return;
     }
 
     if (init == 0U)
     {
-        last_raw = Encoder_Value.Raw_Num;
+        last_raw = raw_now;
         init = 1U;
+        vel_rpm_filt = 0.0f;
         Real.Mech_Vel_RPM = 0.0f;
         return;
     }
 
-    delta = (int32_t)(Encoder_Value.Raw_Num - last_raw);
+    delta = (int32_t)(raw_now - last_raw);
 
     if (delta > (int32_t)(ENC_RES / 2U))
     {
@@ -107,7 +111,9 @@ void Encoder_CalcSpeed( )
         delta += (int32_t)ENC_RES;
     }
 
-    last_raw = Encoder_Value.Raw_Num;
+    last_raw = raw_now;
 
-    Real.Mech_Vel_RPM = ((float)delta * 60.0f) / ((float)ENC_RES * Ts);
+    vel_rpm_raw = ((float)delta * 60.0f) / ((float)ENC_RES * Ts);
+    vel_rpm_filt += 0.9f * (vel_rpm_raw - vel_rpm_filt);
+    Real.Mech_Vel_RPM = vel_rpm_filt;
 }

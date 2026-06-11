@@ -3,7 +3,20 @@
 
 #include <stdint.h>
 
-extern uint16_t ADC_DMA[5];
+extern volatile uint16_t ADC_DMA[5];
+
+typedef struct
+{
+    volatile uint32_t u_cnt;
+    volatile uint32_t v_cnt;
+    volatile uint32_t w_cnt;
+    volatile uint32_t bus_cnt;
+    uint32_t last_u_cnt;
+    uint32_t last_v_cnt;
+    uint32_t last_w_cnt;
+    uint32_t mismatch_cnt;
+    uint32_t stale_cnt;
+}ADC_DmaDiag_t;
 
 typedef struct{
     uint16_t Raw_U;
@@ -43,6 +56,7 @@ typedef struct
 
 extern ADC_Config_t ADC_Config;
 extern ADC_t ADC_Value;
+extern ADC_DmaDiag_t ADC_DmaDiag;
 
 void ADC_Calibration(void);
 void Current_Samp(void);

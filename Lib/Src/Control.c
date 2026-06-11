@@ -3,11 +3,15 @@
 #include "MY_ADC.h"
 #include "main.h"
 #include "MotorCofig.h"
+#include "VOFA.h"
+#include "MY_Tim.h"
 
 #define CURRENT_LOOP_DEFAULT_VBUS 48.0f
 #define CURRENT_LOOP_TS           (1.0f / (float)PWM_FREQ)
 #define CURRENT_LOOP_VOLT_LIMIT   (CURRENT_LOOP_DEFAULT_VBUS / SQRT3)
 #define CURRENT_LOOP_BW_RAD       1000.0f
+#define SPD_IQ_RISE_STEP_A        0.02f
+#define SPD_IQ_FALL_STEP_A        0.05f
 
 
 Ctrl_t IqLoop = {
@@ -24,8 +28,8 @@ Ctrl_t IdLoop = {
 
 Ctrl_t SpdLoop = {
     .Ts = 10.0f * CURRENT_LOOP_TS,
-    .out_max = 0.5f,
-    .out_min = -0.5f,
+    .out_max = 5.0f,
+    .out_min = -5.0f,
 
 };
 Ctrl_t PosLoop = {0};
@@ -80,8 +84,8 @@ static void CurrLoop_InitGain(void)
     IqLoop.ki = Motor->PP_Res * PWM_FREQ / 3;
     IdLoop.kp = Motor->D_Ind * PWM_FREQ/ 3 ;
     IdLoop.ki = Motor->PP_Res * PWM_FREQ / 3;
-    SpdLoop.kp = 0.002f;
-    SpdLoop.ki = 0.1f;
+    SpdLoop.kp = 0.0095f;
+    SpdLoop.ki = 0.055f;
 
     init_done = 1U;
 }
@@ -107,6 +111,37 @@ static float PI_Run(Ctrl_t *loop, float ref, float fdb)
 
 }
 
+static float SpdLoop_LimitIqSlew(float target)
+{
+    static float iq_slew = 0.0f;
+    float delta = target - iq_slew;
+    float step = SPD_IQ_RISE_STEP_A;
+
+    if ((target * target) < (iq_slew * iq_slew))
+    {
+        step = SPD_IQ_FALL_STEP_A;
+    }
+    else if (target * iq_slew < 0.0f)
+    {
+        step = SPD_IQ_FALL_STEP_A;
+    }
+
+    if (delta > step)
+    {
+        iq_slew += step;
+    }
+    else if (delta < -step)
+    {
+        iq_slew -= step;
+    }
+    else
+    {
+        iq_slew = target;
+    }
+
+    return iq_slew;
+}
+
 
 void CurrLoop_Run(float RealQ, float RealD, float ExptQ, float ExptD, float *Volq, float *Vold)
 {
@@ -125,7 +160,19 @@ void CurrLoop_Run(float RealQ, float RealD, float ExptQ, float ExptD, float *Vol
 
 void SpdLoop_Run(float RealVel, float ExptVel, float *ExptQ)
 {
-    *ExptQ = PI_Run(&SpdLoop, ExptVel, RealVel);
+    float pi_out;
+    float iq_ref;
+
+    if (ExptQ == 0)
+    {
+        return;
+    }
+
+    pi_out = PI_Run(&SpdLoop, ExptVel, RealVel);
+    iq_ref = SpdLoop_LimitIqSlew(pi_out);
+
+    SpdLoop.out = iq_ref;
+    *ExptQ = iq_ref;
 
 }
 

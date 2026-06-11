@@ -6,8 +6,11 @@
 #include "MotorCofig.h"
 #include "TEST.h"
 #include "Encoder.h"
+#include "arm_math.h"
 #include <stdint.h>
 #include <stdio.h>
+
+#define TIM_CURRENT_LOOP_TS (1.0f / (float)PWM_FREQ)
 
 uint32_t Encoder_Offset_Data[13];
 
@@ -15,6 +18,7 @@ float Angle_Expt = 0.0f;
 uint8_t Offset_num = 0;
 volatile uint32_t CNT = 0;
 volatile uint32_t Spd_CNT = 0;
+volatile uint32_t Com_CNT = 0;
 
 CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint32_t TimerIdx)
 {
@@ -24,6 +28,7 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
     Start_Angle_Read();
 		CNT++;
     Spd_CNT++;
+
     if(MOTOR_MODE == MOTOR_MODE_OFFSET)
     {
       static float VolD_Expt = 1.2f;
@@ -87,13 +92,24 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
     {
     Current_Samp();
     
-    if(Spd_CNT >= 10) 
+    if((Spd_CNT >= 10) && (Angle_Ready != 0U)) 
     {
+      float expt_spd_now;
+      float spd_ts = (float)Spd_CNT * TIM_CURRENT_LOOP_TS;
       
-      Encoder_CalcSpeed();
-      SpdLoop_Run(Real.Mech_Vel_RPM, 100.0f, &Expt.Iq);
+      Angle_Ready = 0U;
+      Encoder_CalcSpeed(spd_ts);
+
+      expt_spd_now = Expt_Spd_Now;
+
+      Expt.Mech_Vel_RPM = expt_spd_now;
+
+      Expt.Mech_Vel_RPM = OutputLimitation(500.0f, -500.0f, Expt.Mech_Vel_RPM);
+
+      SpdLoop_Run(Real.Mech_Vel_RPM, Expt.Mech_Vel_RPM, &Expt.Iq);
        //
       Spd_CNT = 0;
+
     }
     if(CNT >= 100)
     {
@@ -101,15 +117,21 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
       CNT = 0;
     }
 
+    float etheta = FOC_State.Etheta;
+    float sin_val = arm_sin_f32(etheta);
+    float cos_val = arm_cos_f32(etheta);
+
+    FOC_State.sinVal = sin_val;
+    FOC_State.cosVal = cos_val;
 
     CLARKE(ADC_Value.Curr_A, ADC_Value.Curr_B, ADC_Value.Curr_C, &FOC_State.Ialpha, &FOC_State.Ibeta);
-    ParkTransform(FOC_State.Ialpha, FOC_State.Ibeta,FOC_State.sinVal, FOC_State.cosVal, &FOC_State.Id, &FOC_State.Iq);
+    ParkTransform(FOC_State.Ialpha, FOC_State.Ibeta, sin_val, cos_val, &FOC_State.Id, &FOC_State.Iq);
 
     CurrLoop_Run(FOC_State.Iq, FOC_State.Id, Expt.Iq, 0.0f,&FOC_State.Vol_Q, &FOC_State.Vol_D);
 
 
     INVERSEPARK(FOC_State.Vol_Q, FOC_State.Vol_D,
-                FOC_State.cosVal, FOC_State.sinVal,
+                cos_val, sin_val,
                 &FOC_State.Ualpha, &FOC_State.Ubeta);
     SVPWM(FOC_State.Ualpha, FOC_State.Ubeta, FOC_GetVbus());
 

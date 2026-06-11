@@ -1,4 +1,5 @@
 #include "VOFA.h"
+#include "stm32g4xx_hal_uart.h"
 #include "usart.h"
 #include <string.h>
 
@@ -7,6 +8,13 @@
 #include "MY_ADC.h"
 #include "Encoder.h"
 
+
+uint8_t UART_GetData[2];
+volatile float Expt_Spd_Now = 0.0f;
+volatile float Spd_Step = 0.0f;
+volatile float Spd_Ramp_Rate_RPM_S = 0.0f;
+
+#define SPD_RAMP_TIME_S 0.005f
 
 void Vofa_JustFloat(float *_data, uint8_t _num)
 {
@@ -48,12 +56,12 @@ void Vofa_Send(uint8_t num)
 
     Vofa_Buffer[0] = FOC_State.Id;
     Vofa_Buffer[1] = FOC_State.Iq;
-    Vofa_Buffer[2] = FOC_State.Ualpha;
-    Vofa_Buffer[3] = FOC_State.Ubeta;
-    Vofa_Buffer[4] = Real.Mech_Vel_RPM;
-    Vofa_Buffer[5] = ADC_Value.Curr_A;
-    Vofa_Buffer[6] = ADC_Value.Curr_B;
-    Vofa_Buffer[7] = ADC_Value.Curr_C;
+    Vofa_Buffer[2] = Real.Mech_Vel_RPM;
+    Vofa_Buffer[3] = Expt.Mech_Vel_RPM;
+    Vofa_Buffer[4] = Expt.Iq;
+    Vofa_Buffer[5] = ADC_Value.Curr_A + ADC_Value.Curr_B + ADC_Value.Curr_C;
+    Vofa_Buffer[6] = ADC_Value.Curr_A;
+    Vofa_Buffer[7] = ADC_Value.Curr_B;
 
     if (num > 8)
     {
@@ -72,4 +80,28 @@ void UART_Send(const char *str)
     }
 
     HAL_UART_Transmit(&huart2, (uint8_t *)str, strlen(str), 10);
+}
+
+void UART_Receive(void)
+{
+    HAL_UART_Receive_IT(&huart2, UART_GetData, 2);
+
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart-> Instance== USART2)
+    {
+        float expt_spd_last = Expt.Mech_Vel_RPM;
+        int16_t spd_cmd;
+
+        spd_cmd = (int16_t)(((uint16_t)UART_GetData[0] << 8) | UART_GetData[1]);
+        Expt_Spd_Now = (float)spd_cmd;
+        Expt.Mech_Vel_RPM = Expt_Spd_Now;
+        Spd_Step = (Expt_Spd_Now - expt_spd_last) * SpdLoop.Ts / SPD_RAMP_TIME_S;
+        Spd_Ramp_Rate_RPM_S = (Expt_Spd_Now - expt_spd_last) / SPD_RAMP_TIME_S;
+
+        HAL_UART_Receive_IT(&huart2, UART_GetData, 2);
+
+    }
 }

@@ -16,7 +16,7 @@ extern volatile uint8_t Angle_Ready;
 
 void Start_Angle_Read(void);
 void Encoder_GetElectricalRad(uint32_t encoder_raw);
-void Encoder_CalcSpeed(void);
+void Encoder_CalcSpeed(float Ts);
 
 typedef struct{
     uint32_t Raw_Num;

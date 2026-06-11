@@ -4,7 +4,8 @@
 
 #define ADC_OFFSET_NUM    1000U
 
-uint16_t ADC_DMA[5] = {0};
+volatile uint16_t ADC_DMA[5] = {0};
+ADC_DmaDiag_t ADC_DmaDiag = {0};
 
 
 ADC_Config_t ADC_Config =
