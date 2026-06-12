@@ -12,6 +12,9 @@
 #define CURRENT_LOOP_BW_RAD       1000.0f
 #define SPD_IQ_RISE_STEP_A        0.02f
 #define SPD_IQ_FALL_STEP_A        0.05f
+#define MIT_MODE_TS               0.005f
+#define MIT_TORQUE_CONSTANT_NM_A  0.15f
+#define MIT_IQ_RAMP_RATE_A_S      20.0f
 
 
 Ctrl_t IqLoop = {
@@ -39,7 +42,13 @@ Ctrl_t PosLoop = {
 };
 Ctrl_Value_t Expt = {0};
 Ctrl_Value_t Real = {0};
-MITMode_t MITMode = {0};
+MITMode_t MITMode = {
+    .torque_max = 5.0f,
+    .torque_min = -5.0f,
+    .kp = 0.0f,
+    .kd = 0.0f,
+    
+};
 
 static inline float Ctrl_GetTs(const Ctrl_t *loop)
 {
@@ -148,6 +157,28 @@ static float SpdLoop_LimitIqSlew(float target)
     return iq_slew;
 }
 
+static float MITMode_LimitIqRamp(float target)
+{
+    static float iq_ramp = 0.0f;
+    float step = MIT_IQ_RAMP_RATE_A_S * MIT_MODE_TS;
+    float delta = target - iq_ramp;
+
+    if (delta > step)
+    {
+        iq_ramp += step;
+    }
+    else if (delta < -step)
+    {
+        iq_ramp -= step;
+    }
+    else
+    {
+        iq_ramp = target;
+    }
+
+    return iq_ramp;
+}
+
 
 void CurrLoop_Run(float RealQ, float RealD, float ExptQ, float ExptD, float *Volq, float *Vold)
 {
@@ -196,8 +227,56 @@ void PosLoop_Run(float RealPos, float ExptPos, float *ExptVel)
     *ExptVel = PI_Run(&PosLoop, ExptPos, RealPos);
 }
 
-void MITModeLoop_Run(void)
+void MITModeLoop_Run(float ExptPos, float ExptVel, float ExptTorque, float Kp, float Kd)
 {
+    //Ctrl DATA
+    //DATA0 7-0 Kp High 8 Bytes
+    //DATA1 7-4 kp Low  4 Bytes  0-3 Kd High 8bytes
+    //DATA2 7-0 Kd Low  8 Bytes
+    //DATA3 7-0 Pos High 8 Bytes
+    //DATA4 7-0 Pos Low  8 Bytes
+    //DATA5 7-0 Vel High 8 Bytes
+    //DATA6 7-4 Vel Low  4 Bytes 3-0 Torque High 4Bytes
+    //DATA7 0-7 Torque Low 8 Bytes
+
+
+
+    //Feedback DATA
+    //DATA0 Pos High 8 Bytes
+    //DATA1 Pos Low 8 Bytes
+    //DATA2 Vel High 8 Bytes
+    //DATA3 Vel Low 8 Bytes
+    //DATA4 Iq High 8 Bytes
+    //DATA5 Iq Low 8 Bytes
+    //DATA6 Tem 
+    //DATA7 Err 
+    float torque_target;
+    float iq_target;
+    float iq_ramp;
+
+    MITMode.pos_ref = ExptPos;
+    MITMode.vel_ref = ExptVel;
+    MITMode.torque_ref = ExptTorque;
+    MITMode.kp = Kp;
+    MITMode.kd = Kd;
+
+    MITMode.pos_fdb = Real.Mech_Pos;
+    MITMode.vel_fdb = Real.Mech_Vel_Rad;
+
+    torque_target = Kp * (MITMode.pos_ref - MITMode.pos_fdb)
+                  + Kd * (MITMode.vel_ref - MITMode.vel_fdb)
+                  + MITMode.torque_ref;
+    torque_target = OutputLimitation(MITMode.torque_max,
+                                     MITMode.torque_min,
+                                     torque_target);
+
+    iq_target = torque_target / MIT_TORQUE_CONSTANT_NM_A;
+    iq_ramp = MITMode_LimitIqRamp(iq_target);
+
+    Expt.Iq = iq_ramp;
+    MITMode.torque_out = iq_ramp * MIT_TORQUE_CONSTANT_NM_A;
+
+
 }
 
 

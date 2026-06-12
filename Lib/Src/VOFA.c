@@ -61,7 +61,7 @@ void Vofa_Send(uint8_t num)
     Vofa_Buffer[3] = Expt.Mech_Vel_RPM;
     Vofa_Buffer[4] = Real.Mech_Pos;
     Vofa_Buffer[5] = Expt.Mech_Pos;
-    Vofa_Buffer[6] = ADC_Value.Curr_A;
+    Vofa_Buffer[6] = UART_GetData[0] <<8 | UART_GetData[1];
     Vofa_Buffer[7] = ADC_Value.Curr_B;
 
     if (num > 8)

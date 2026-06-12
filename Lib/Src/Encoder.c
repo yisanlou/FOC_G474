@@ -124,6 +124,7 @@ void Encoder_CalcSpeed(float Ts)
     {
         vel_rpm_filt = 0.0f;
         Real.Mech_Vel_RPM = 0.0f;
+        Real.Mech_Vel_Rad = 0.0f;
         return;
     }
 
@@ -133,6 +134,7 @@ void Encoder_CalcSpeed(float Ts)
         init = 1U;
         vel_rpm_filt = 0.0f;
         Real.Mech_Vel_RPM = 0.0f;
+        Real.Mech_Vel_Rad = 0.0f;
         return;
     }
 
@@ -152,4 +154,5 @@ void Encoder_CalcSpeed(float Ts)
     vel_rpm_raw = ((float)delta * 60.0f) / ((float)ENC_RES * Ts);
     vel_rpm_filt += 0.9f * (vel_rpm_raw - vel_rpm_filt);
     Real.Mech_Vel_RPM = vel_rpm_filt;
+    Real.Mech_Vel_Rad = vel_rpm_filt * TWO_PI / 60.0f;
 }

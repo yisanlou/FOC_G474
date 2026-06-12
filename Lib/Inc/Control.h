@@ -74,6 +74,6 @@ void CurrLoop_Reset(void);
 void CurrLoop_Run(float RealQ, float RealD, float ExptQ, float ExptD, float *Volq, float *Vold);
 void SpdLoop_Run(float RealVel, float ExptVel, float *ExptQ);
 void PosLoop_Run(float RealPos, float ExptPos, float *ExptVel);
-void MITModeLoop_Run(void);
+void MITModeLoop_Run(float ExptPos, float ExptVel, float ExptTorque, float Kp, float Kd);
 
 #endif

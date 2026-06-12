@@ -11,7 +11,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define TIM6_SPEED_LOOP_TS  (1.0f / 2000.0f)
+#define TIM6_SPEED_LOOP_TS  (1.0f / 1000.0f)
+#define TIM6_MIT_LOOP_DIV   5U
 
 uint32_t Encoder_Offset_Data[13];
 
@@ -132,19 +133,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if ((htim->Instance == TIM6) && (MOTOR_MODE == MOTOR_MODE_WORK))
   {
-    static uint8_t pos_loop_cnt = 0U;
+    static uint8_t mit_loop_cnt = 0U;
+    // static uint8_t pos_loop_cnt =0;
 
     Encoder_CalcSpeed(TIM6_SPEED_LOOP_TS);
 
-    pos_loop_cnt++;
-    if (pos_loop_cnt >= 10U)
+    mit_loop_cnt++;
+    if (mit_loop_cnt >= TIM6_MIT_LOOP_DIV)
     {
-      PosLoop_Run(Real.Mech_Pos, Expt.Mech_Pos, &Expt.Mech_Vel_RPM);
-      pos_loop_cnt = 0U;
+      MITModeLoop_Run(MITMode.pos_ref,
+                      MITMode.vel_ref,
+                      MITMode.torque_ref,
+                      MITMode.kp,
+                      MITMode.kd);
+      mit_loop_cnt = 0U;
     }
 
-    Expt.Mech_Vel_RPM = OutputLimitation(500.0f, -500.0f, Expt.Mech_Vel_RPM);
+  //   pos_loop_cnt++;
+  //   if (pos_loop_cnt >= 10U)
+  //   {
+  //     PosLoop_Run(Real.Mech_Pos, Expt.Mech_Pos, &Expt.Mech_Vel_RPM);
+  //     pos_loop_cnt = 0U;
+  //   }
 
-    SpdLoop_Run(Real.Mech_Vel_RPM, Expt.Mech_Vel_RPM, &Expt.Iq);
-  }
+  //   Expt.Mech_Vel_RPM = OutputLimitation(500.0f, -500.0f, Expt.Mech_Vel_RPM);
+
+  //   SpdLoop_Run(Real.Mech_Vel_RPM, Expt.Mech_Vel_RPM, &Expt.Iq);
+   }
+
+
+
 }

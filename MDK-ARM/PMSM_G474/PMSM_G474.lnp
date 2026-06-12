@@ -45,6 +45,7 @@
 "pmsm_g474\vofa.o"
 "pmsm_g474\encoder.o"
 "pmsm_g474\motorcofig.o"
+"pmsm_g474\my_can.o"
 "..\Middlewares\ST\ARM\DSP\Lib\arm_cortexM4lf_math.lib"
 --strict --scatter "stm32g474xx_flash.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
