@@ -7,17 +7,17 @@
 #include "TEST.h"
 #include "Encoder.h"
 #include "arm_math.h"
+#include "tim.h"
 #include <stdint.h>
 #include <stdio.h>
 
-#define TIM_CURRENT_LOOP_TS (1.0f / (float)PWM_FREQ)
+#define TIM6_SPEED_LOOP_TS  (1.0f / 2000.0f)
 
 uint32_t Encoder_Offset_Data[13];
 
 float Angle_Expt = 0.0f;
 uint8_t Offset_num = 0;
 volatile uint32_t CNT = 0;
-volatile uint32_t Spd_CNT = 0;
 volatile uint32_t Com_CNT = 0;
 
 CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint32_t TimerIdx)
@@ -27,7 +27,6 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
   {
     Start_Angle_Read();
 		CNT++;
-    Spd_CNT++;
 
     if(MOTOR_MODE == MOTOR_MODE_OFFSET)
     {
@@ -92,25 +91,6 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
     {
     Current_Samp();
     
-    if((Spd_CNT >= 10) && (Angle_Ready != 0U)) 
-    {
-      float expt_spd_now;
-      float spd_ts = (float)Spd_CNT * TIM_CURRENT_LOOP_TS;
-      
-      Angle_Ready = 0U;
-      Encoder_CalcSpeed(spd_ts);
-
-      expt_spd_now = Expt_Spd_Now;
-
-      Expt.Mech_Vel_RPM = expt_spd_now;
-
-      Expt.Mech_Vel_RPM = OutputLimitation(500.0f, -500.0f, Expt.Mech_Vel_RPM);
-
-      SpdLoop_Run(Real.Mech_Vel_RPM, Expt.Mech_Vel_RPM, &Expt.Iq);
-       //
-      Spd_CNT = 0;
-
-    }
     if(CNT >= 100)
     {
       Vofa_Send(8);
@@ -145,5 +125,26 @@ CCMRAM void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef *hhrtim, uint3
     
     
 
+  }
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if ((htim->Instance == TIM6) && (MOTOR_MODE == MOTOR_MODE_WORK))
+  {
+    static uint8_t pos_loop_cnt = 0U;
+
+    Encoder_CalcSpeed(TIM6_SPEED_LOOP_TS);
+
+    pos_loop_cnt++;
+    if (pos_loop_cnt >= 10U)
+    {
+      PosLoop_Run(Real.Mech_Pos, Expt.Mech_Pos, &Expt.Mech_Vel_RPM);
+      pos_loop_cnt = 0U;
+    }
+
+    Expt.Mech_Vel_RPM = OutputLimitation(500.0f, -500.0f, Expt.Mech_Vel_RPM);
+
+    SpdLoop_Run(Real.Mech_Vel_RPM, Expt.Mech_Vel_RPM, &Expt.Iq);
   }
 }

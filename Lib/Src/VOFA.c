@@ -8,6 +8,7 @@
 #include "MY_ADC.h"
 #include "Encoder.h"
 
+#define DEG_TO_RAD 0.01745329252f
 
 uint8_t UART_GetData[2];
 volatile float Expt_Spd_Now = 0.0f;
@@ -54,12 +55,12 @@ void Vofa_Send(uint8_t num)
 {
     static float Vofa_Buffer[8];
 
-    Vofa_Buffer[0] = FOC_State.Id;
-    Vofa_Buffer[1] = FOC_State.Iq;
+    Vofa_Buffer[0] = FOC_State.Iq;
+    Vofa_Buffer[1] = Expt.Iq;
     Vofa_Buffer[2] = Real.Mech_Vel_RPM;
     Vofa_Buffer[3] = Expt.Mech_Vel_RPM;
-    Vofa_Buffer[4] = Expt.Iq;
-    Vofa_Buffer[5] = ADC_Value.Curr_A + ADC_Value.Curr_B + ADC_Value.Curr_C;
+    Vofa_Buffer[4] = Real.Mech_Pos;
+    Vofa_Buffer[5] = Expt.Mech_Pos;
     Vofa_Buffer[6] = ADC_Value.Curr_A;
     Vofa_Buffer[7] = ADC_Value.Curr_B;
 
@@ -93,11 +94,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     if(huart-> Instance== USART2)
     {
         float expt_spd_last = Expt.Mech_Vel_RPM;
-        int16_t spd_cmd;
+        int16_t pos_cmd_deg;
 
-        spd_cmd = (int16_t)(((uint16_t)UART_GetData[0] << 8) | UART_GetData[1]);
-        Expt_Spd_Now = (float)spd_cmd;
-        Expt.Mech_Vel_RPM = Expt_Spd_Now;
+        pos_cmd_deg = (int16_t)(((uint16_t)UART_GetData[0] << 8) | UART_GetData[1]);
+        Expt.Mech_Pos = (float)pos_cmd_deg * DEG_TO_RAD;
+        Expt_Spd_Now = 0.0f;
+        Expt.Mech_Vel_RPM = 0.0f;
         Spd_Step = (Expt_Spd_Now - expt_spd_last) * SpdLoop.Ts / SPD_RAMP_TIME_S;
         Spd_Ramp_Rate_RPM_S = (Expt_Spd_Now - expt_spd_last) / SPD_RAMP_TIME_S;
 

@@ -18,6 +18,41 @@ Encoder_t Encoder_Value =
     .Offset = 281047 
 };
 
+static void Encoder_UpdateMechanicalPosition(uint32_t mech_raw)
+{
+    static uint8_t init = 0U;
+    static uint32_t last_mech_raw = 0U;
+    static int64_t mech_pos_cnt = 0;
+    int32_t delta;
+
+    if (init == 0U)
+    {
+        last_mech_raw = mech_raw;
+        mech_pos_cnt = (int64_t)mech_raw;
+        init = 1U;
+    }
+    else
+    {
+        delta = (int32_t)(mech_raw - last_mech_raw);
+
+        if (delta > (int32_t)(ENC_RES / 2U))
+        {
+            delta -= (int32_t)ENC_RES;
+        }
+        else if (delta < -(int32_t)(ENC_RES / 2U))
+        {
+            delta += (int32_t)ENC_RES;
+        }
+
+        mech_pos_cnt += (int64_t)delta;
+        last_mech_raw = mech_raw;
+    }
+
+    Encoder_Value.Mech_Angle = (float)mech_raw;
+    Encoder_Value.Mech_pi = ((float)mech_raw * TWO_PI) / (float)ENC_RES;
+    Real.Mech_Pos = ((float)mech_pos_cnt * TWO_PI) / (float)ENC_RES;
+}
+
 
 void Start_Angle_Read(void)
 {
@@ -59,6 +94,7 @@ void Encoder_GetElectricalRad(uint32_t encoder_raw)
 
 
     mech_raw = encoder_raw & ENC_MASK;
+    Encoder_UpdateMechanicalPosition(mech_raw);
 
     /*
      * 机械角度 × 极对数

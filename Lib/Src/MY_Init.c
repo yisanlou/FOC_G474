@@ -28,6 +28,10 @@ void My_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_Base_Start_IT(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
   HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_A].CMP1xR = 8500;
   HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_B].CMP1xR = 8500;
   HRTIM1 -> sTimerxRegs[HRTIM_TIMERINDEX_TIMER_E].CMP1xR = 8500;

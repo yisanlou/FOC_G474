@@ -32,7 +32,11 @@ Ctrl_t SpdLoop = {
     .out_min = -5.0f,
 
 };
-Ctrl_t PosLoop = {0};
+Ctrl_t PosLoop = {
+    .Ts = 10.0f * 10.0f * CURRENT_LOOP_TS,
+    .out_max = 500.0f,
+    .out_min = -500.0f,
+};
 Ctrl_Value_t Expt = {0};
 Ctrl_Value_t Real = {0};
 MITMode_t MITMode = {0};
@@ -86,6 +90,8 @@ static void CurrLoop_InitGain(void)
     IdLoop.ki = Motor->PP_Res * PWM_FREQ / 3;
     SpdLoop.kp = 0.0095f;
     SpdLoop.ki = 0.055f;
+    PosLoop.kp = 60.0f;
+    PosLoop.ki = 0.0f;
 
     init_done = 1U;
 }
@@ -168,6 +174,8 @@ void SpdLoop_Run(float RealVel, float ExptVel, float *ExptQ)
         return;
     }
 
+    CurrLoop_InitGain();
+
     pi_out = PI_Run(&SpdLoop, ExptVel, RealVel);
     iq_ref = SpdLoop_LimitIqSlew(pi_out);
 
@@ -176,8 +184,16 @@ void SpdLoop_Run(float RealVel, float ExptVel, float *ExptQ)
 
 }
 
-void PosLoop_Run(void)
+void PosLoop_Run(float RealPos, float ExptPos, float *ExptVel)
 {
+    if (ExptVel == 0)
+    {
+        return;
+    }
+
+    CurrLoop_InitGain();
+
+    *ExptVel = PI_Run(&PosLoop, ExptPos, RealPos);
 }
 
 void MITModeLoop_Run(void)
